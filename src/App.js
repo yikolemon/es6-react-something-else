@@ -21,41 +21,71 @@ const list = [
 
 
 
-const isSearched=searchTerm=>(item)=>{
+const isSearched = searchTerm => (item) => {
   return item.title.toLowerCase().includes(searchTerm.toLowerCase());
 }
 
-class App extends Component{
-  constructor(props){
+class App extends Component {
+  constructor(props) {
     super(props);
-    this.state={
+    this.state = {
       list: list,
       searchTerm: ''
     };
   }
 
   //定义函数用箭头函数，不需要绑定
-  onDismiss=(id)=>{
-    const isNotId = item => item.objectID!==id;
-    const updateList=this.state.list.filter(isNotId);
-    this.setState({list:updateList})
+  onDismiss = (id) => {
+    const isNotId = item => item.objectID !== id;
+    const updateList = this.state.list.filter(isNotId);
+    this.setState({ list: updateList })
   }
 
-  onSearchChange=(event)=>{
-    this.setState({searchTerm: event.target.value});
+  onSearchChange = (event) => {
+    this.setState({ searchTerm: event.target.value });
     console.log(event.target.value);
   }
 
-  render(){
-    return(
+  render() {
+    const { list, searchTerm } = this.state;
+    return (
       <div className='App'>
-        <form>
-          <input 
-          type="text" 
+        <Search
+          value={searchTerm}
           onChange={this.onSearchChange}
-          />
-        </form>
-        {this.state.list.filter(isSearched(this.state.searchTerm)).map(item=>
+        />
+        <Table
+          list={list}
+          pattern={searchTerm}
+          onDismiss={this.onDismiss}
+        />
+      </div>
+    )
+  }
+}
+
+class Search extends Component {
+  render() {
+    const {value,onChange}=this.props;
+    return(
+      <form>
+        <input
+          type="text"
+          onChange={onChange}
+          value={value}
+        />
+      </form>
+    )
+  }
+}
+
+class Table extends Component {
+  render() {
+    const{list,pattern,onDismiss}=this.props;
+    return(
+      <div>
+      {
+        list.filter(isSearched(pattern)).map(item =>
           <div key={item.objectID}>
             <span>
               <a href={item.url}>
@@ -66,17 +96,18 @@ class App extends Component{
             <span>{item.num_comments}</span>
             <span>{item.points}</span>
             <span>
-              <button 
-              onClick={()=>{
-                  this.onDismiss(item.objectID)
-              }}
-              type="button"
+              <button
+                onClick={() => {
+                  onDismiss(item.objectID)
+                }}
+                type="button"
               >
                 Dismiss
               </button>
             </span>
           </div>
-        )}
+        )
+      }
       </div>
     )
   }
