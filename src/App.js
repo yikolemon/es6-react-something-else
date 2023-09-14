@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './App.css';
 
 const list = [
   {
@@ -49,11 +50,15 @@ class App extends Component {
   render() {
     const { list, searchTerm } = this.state;
     return (
-      <div className='App'>
-        <Search
-          value={searchTerm}
-          onChange={this.onSearchChange}
-        />
+      <div className="page">
+        <div className="interactions">
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+          >
+            Search
+          </Search>
+        </div>
         <Table
           list={list}
           pattern={searchTerm}
@@ -63,54 +68,62 @@ class App extends Component {
     )
   }
 }
+const Search = ({ value, onChange, children }) =>
+  <form>
+    {children}
+    <input
+      type="text"
+      onChange={onChange}
+      value={value}
+    />
+  </form>
 
-class Search extends Component {
-  render() {
-    const {value,onChange}=this.props;
-    return(
-      <form>
-        <input
-          type="text"
-          onChange={onChange}
-          value={value}
-        />
-      </form>
-    )
-  }
-}
 
-class Table extends Component {
-  render() {
-    const{list,pattern,onDismiss}=this.props;
-    return(
-      <div>
+const Table=({list, pattern, onDismiss})=>{
+  return (
+    <div className="table">
       {
         list.filter(isSearched(pattern)).map(item =>
-          <div key={item.objectID}>
-            <span>
+          <div key={item.objectID} className="table-row">
+            <span style={{width:'40%'}}>
               <a href={item.url}>
                 {item.title}
               </a>
             </span>
-            <span>{item.author}</span>
-            <span>{item.num_comments}</span>
-            <span>{item.points}</span>
+            <span style={{width:'30%'}}>{item.author}</span>
+            <span style={{width:'10%'}}>{item.num_comments}</span>
+            <span style={{width:'10%'}}>{item.points}</span>
             <span>
-              <button
+              <Button
                 onClick={() => {
                   onDismiss(item.objectID)
                 }}
-                type="button"
+                className="button-inline"
               >
                 Dismiss
-              </button>
+              </Button>
             </span>
           </div>
         )
       }
-      </div>
-    )
-  }
+    </div>
+  )
+}
+
+function Button(props) {
+  const {
+    onClick,
+    className = '',
+    children,
+  } = props;
+  return (
+    <button
+      onClick={onClick}
+      className={className}
+      type='button'>
+      {children}
+    </button>
+  );
 }
 
 export default App;
