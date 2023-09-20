@@ -4,6 +4,7 @@ import './App.css';
 const DEFAULT_QUERY = 'redux'
 const DEFAULT_HPP = '100';
 
+// const PATH_BASE = 'https://hn.foo.bar.com/api/v1';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
@@ -22,7 +23,8 @@ class App extends Component {
     this.state = {
       results: null,
       searchTerm: DEFAULT_QUERY,
-      searchKey:''
+      searchKey:'',
+      error: null
     };
   }
 
@@ -49,7 +51,9 @@ class App extends Component {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
     .then(response => response.json())
     .then(result => this.setSearchTopStories(result))
-    .catch(e => e);
+    .catch(e => this.setState({
+      error:e
+    }));
   }
 
   componentDidMount=()=>{
@@ -94,10 +98,13 @@ class App extends Component {
   }
 
   render() {
-    const { results, searchTerm,searchKey} = this.state;
+    const { results, searchTerm,searchKey,error} = this.state;
     //!result阻止了组件的显示
     const page = (results &&results[searchKey]&& results[searchKey].page) || 0;
 
+    // if(error){
+    //   return <p>Something went wrong</p>;
+    // }
 
     return (
       <div className="page">
@@ -111,6 +118,13 @@ class App extends Component {
           </Search>
         </div>
         {
+          error?
+            <div className='interactions'>
+              <p>
+                Something went wrong
+              </p>
+            </div>
+            :
           results
           &&results[searchKey]
           && <Table
