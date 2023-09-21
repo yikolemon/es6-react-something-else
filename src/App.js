@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import PropTypes from 'prop-types';
 
 const DEFAULT_QUERY = 'redux'
 const DEFAULT_HPP = '100';
@@ -23,19 +24,19 @@ class App extends Component {
     this.state = {
       results: null,
       searchTerm: DEFAULT_QUERY,
-      searchKey:'',
+      searchKey: '',
       error: null
     };
   }
 
-  setSearchTopStories=(result) =>{
-    const {hits,page}= result;
-    const{searchKey,results}=this.state;
+  setSearchTopStories = (result) => {
+    const { hits, page } = result;
+    const { searchKey, results } = this.state;
     const oldHits = results && results[searchKey]
-    ? results[searchKey].hits
-    : [];
+      ? results[searchKey].hits
+      : [];
 
-    const updatedHits=[
+    const updatedHits = [
       ...oldHits,
       ...hits
     ]
@@ -43,36 +44,36 @@ class App extends Component {
       results: {
         ...results,
         [searchKey]: { hits: updatedHits, page }
-        }
+      }
     });
   }
 
-  fetchSearchTopStories=(searchTerm,page=0)=>{
+  fetchSearchTopStories = (searchTerm, page = 0) => {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-    .then(response => response.json())
-    .then(result => this.setSearchTopStories(result))
-    .catch(e => this.setState({
-      error:e
-    }));
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(e => this.setState({
+        error: e
+      }));
   }
 
-  componentDidMount=()=>{
+  componentDidMount = () => {
     const { searchTerm } = this.state;
-    this.setState({searchKey: searchTerm});
+    this.setState({ searchKey: searchTerm });
     this.fetchSearchTopStories(searchTerm);
   }
 
   //定义函数用箭头函数，不需要绑定
   onDismiss = (id) => {
-    const{searchKey,results}=this.state;
-    const{hits,page}=results[searchKey];
+    const { searchKey, results } = this.state;
+    const { hits, page } = results[searchKey];
     const isNotId = item => item.objectID !== id;
     const updatedHits = hits.filter(isNotId);
     this.setState({
       results: {
         ...results,
         [searchKey]: {
-          hits:updatedHits,
+          hits: updatedHits,
           page
         }
       }
@@ -84,8 +85,8 @@ class App extends Component {
     console.log(event.target.value);
   }
 
-  onSearchSubmit=(event)=>{
-    const{searchTerm}=this.state;
+  onSearchSubmit = (event) => {
+    const { searchTerm } = this.state;
     this.setState({ searchKey: searchTerm });
     if (this.needsToSearchTopStories(searchTerm)) {
       this.fetchSearchTopStories(searchTerm);
@@ -93,14 +94,14 @@ class App extends Component {
     event.preventDefault();
   }
 
-  needsToSearchTopStories(searchTerm){
+  needsToSearchTopStories(searchTerm) {
     return !this.state.results[searchTerm];
   }
 
   render() {
-    const { results, searchTerm,searchKey,error} = this.state;
+    const { results, searchTerm, searchKey, error } = this.state;
     //!result阻止了组件的显示
-    const page = (results &&results[searchKey]&& results[searchKey].page) || 0;
+    const page = (results && results[searchKey] && results[searchKey].page) || 0;
 
     // if(error){
     //   return <p>Something went wrong</p>;
@@ -118,23 +119,23 @@ class App extends Component {
           </Search>
         </div>
         {
-          error?
+          error ?
             <div className='interactions'>
               <p>
                 Something went wrong
               </p>
             </div>
             :
-          results
-          &&results[searchKey]
-          && <Table
-          list={results[searchKey].hits}
-          onDismiss={this.onDismiss}
-          />
+            results
+            && results[searchKey]
+            && <Table
+              list={results[searchKey].hits}
+              onDismiss={this.onDismiss}
+            />
         }
         <div className="interactions">
           <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
-          More
+            More
           </Button>
         </div>
       </div>
@@ -142,7 +143,7 @@ class App extends Component {
   }
 }
 
-const Search = ({ value, onChange, onSubmit,children}) =>
+const Search = ({ value, onChange, onSubmit, children }) =>
   <form onSubmit={onSubmit}>
     <input
       type="text"
@@ -154,20 +155,20 @@ const Search = ({ value, onChange, onSubmit,children}) =>
     </button>
   </form>
 
-const Table=({list,onDismiss})=>{
+const Table = ({ list, onDismiss }) => {
   return (
     <div className="table">
       {
         list.map(item =>
           <div key={item.objectID} className="table-row">
-            <span style={{width:'40%'}}>
+            <span style={{ width: '40%' }}>
               <a href={item.url}>
                 {item.title}
               </a>
             </span>
-            <span style={{width:'30%'}}>{item.author}</span>
-            <span style={{width:'10%'}}>{item.num_comments}</span>
-            <span style={{width:'10%'}}>{item.points}</span>
+            <span style={{ width: '30%' }}>{item.author}</span>
+            <span style={{ width: '10%' }}>{item.num_comments}</span>
+            <span style={{ width: '10%' }}>{item.points}</span>
             <span>
               <Button
                 onClick={() => {
@@ -185,20 +186,54 @@ const Table=({list,onDismiss})=>{
   )
 }
 
-function Button(props) {
-  const {
-    onClick,
-    className = '',
-    children,
-  } = props;
+const Button = ({ onClick, className, children }) => {
   return (
     <button
       onClick={onClick}
       className={className}
-      type='button'>
+      type="button"
+    >
       {children}
     </button>
-  );
+  )
 }
 
+Button.defaultProps={
+  className: ''
+}
+
+Button.prototype = {
+  onClick: PropTypes.func.isRequired,
+  className: PropTypes.string,
+  children: PropTypes.node.isRequired
+}
+
+Table.propTypes = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      objectID: PropTypes.string.isRequired,
+      author: PropTypes.string,
+      url: PropTypes.string,
+      num_comments: PropTypes.number,
+      points: PropTypes.number,
+    })
+  ).isRequired,
+  onDismiss: PropTypes.func.isRequired,
+};
+
+Search.prototype={
+  value:PropTypes.string,
+  onChange:PropTypes.func.isRequired,
+  onSubmit:PropTypes.func.isRequired,
+  children:PropTypes.node.isRequired
+}
+
+
+
 export default App;
+
+export {
+  Button,
+  Search,
+  Table
+};
